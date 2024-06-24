@@ -1,0 +1,12 @@
+menu "RTOS SDK Core Library Configuration"
+    config APP_MODULE
+        string "App module name"
+        default "DEFAULT"
+
+    config SYSTEM_DOMAIN
+        string "System backend domain"
+        default "home.quangiaso.com"
+    config SYSTEM_PORT
+        int "System backend port"
+        default 80
+endmenu

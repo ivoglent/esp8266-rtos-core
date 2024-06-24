@@ -1,1 +1,0 @@
-COMPONENT_SRCDIRS := . ./system ./system/wifi ./system/console ./system/config ./system/storage ./system/command ./system/mqtt ./system/ota ./components/tuya-switch
