@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>IoT | SmartHome Configuration</title>
+  <style>
+    html {
+      height: 100%;
+    }
+    body{
+      min-height: 100%;
+    }
+    body {
+      background-image: linear-gradient(19deg, #21D4FD 0%, #B721FF 100%);
+      background-repeat: no-repeat;
+      font: 400 16px/1.5em "Open Sans", sans-serif;
+    }
+    .page-content,.tabbed {
+      min-height: 100%;
+      height: 100%;
+    }
+    .page-content {
+      max-width: 700px;
+      margin: 10px auto;
+      padding: 15px;
+      background: #fff;
+      height: 90vh;
+    }
+    a {
+      color: #21D4FD;
+      transition: all 0.3s;
+    }
+    a:hover {
+      color: #B721FF;
+    }
+
+    .tabbed {
+      overflow-x: hidden; /* so we could easily hide the radio inputs */
+      margin: 10px 0;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #ccc;
+    }
+
+    .tabbed [type="radio"] {
+      /* hiding the inputs */
+      display: none;
+    }
+
+    .tabs {
+      display: flex;
+      align-items: stretch;
+      list-style: none;
+      padding: 0;
+      border-bottom: 1px solid #ccc;
+    }
+    .tab > label {
+      display: block;
+      margin-bottom: -1px;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      background: #eee;
+      color: #666;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    .tab:hover label {
+      border-top-color: #333;
+      color: #333;
+    }
+
+    .tab-content {
+      display: none;
+      color: #777;
+    }
+
+    /* As we cannot replace the numbers with variables or calls to element properties, the number of this selector parts is our tab count limit */
+    .tabbed [type="radio"]:nth-of-type(1):checked ~ .tabs .tab:nth-of-type(1) label,
+    .tabbed [type="radio"]:nth-of-type(2):checked ~ .tabs .tab:nth-of-type(2) label,
+    .tabbed [type="radio"]:nth-of-type(3):checked ~ .tabs .tab:nth-of-type(3) label,
+    .tabbed [type="radio"]:nth-of-type(4):checked ~ .tabs .tab:nth-of-type(4) label,
+    .tabbed [type="radio"]:nth-of-type(5):checked ~ .tabs .tab:nth-of-type(5) label {
+      border-bottom-color: #fff;
+      border-top-color: #B721FF;
+      background: #fff;
+      color: #222;
+    }
+
+    .tabbed [type="radio"]:nth-of-type(1):checked ~ .tab-content:nth-of-type(1),
+    .tabbed [type="radio"]:nth-of-type(2):checked ~ .tab-content:nth-of-type(2),
+    .tabbed [type="radio"]:nth-of-type(3):checked ~ .tab-content:nth-of-type(3),
+    .tabbed [type="radio"]:nth-of-type(4):checked ~ .tab-content:nth-of-type(4) {
+      display: block;
+    }
+    .container {
+      width: 100%;
+      min-height: 100%;
+      padding: 5px;
+    }
+    .icon {
+      float: left;
+    }
+    .header {
+      float: left;
+      margin-left: 20px;
+      margin-top: 10px;
+      font-size: 24px;
+    }
+    .menu ul li {
+      float: left;
+      margin-right: 15px;
+      list-style: none;
+    }
+    .clear {
+      clear: both;
+    }
+    .row {
+      display: inline-block;
+      margin-bottom: 5px;
+      clear: both;
+      width: 100%;
+    }
+    .row .td {
+      float: left;
+    }
+    .row .td:first-child {
+      width: 130px;
+    }
+    .row .td:last-child{
+      font-weight: bold;
+    }
+    .form-input {
+      min-width: 300px;
+      padding: 5px;
+    }
+    .form-label{
+      width: 100%;
+      display: inline-block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .form-button {
+      background-color: #36A9AE;
+      background-image: linear-gradient(#37ADB2, #329CA0);
+      border: 1px solid #2A8387;
+      border-radius: 4px;
+      box-shadow: rgba(0, 0, 0, 0.12) 0 1px 1px;
+      color: #FFFFFF;
+      cursor: pointer;
+      display: block;
+      font-family: -apple-system,".SFNSDisplay-Regular","Helvetica Neue",Helvetica,Arial,sans-serif;
+      font-size: 17px;
+      line-height: 100%;
+      margin: 0;
+      outline: 0;
+      padding: 11px 15px 12px;
+      text-align: center;
+      transition: box-shadow .05s ease-in-out,opacity .05s ease-in-out;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: manipulation;
+      width: 100%;
+    }
+
+    .form-button:hover {
+      box-shadow: rgba(255, 255, 255, 0.3) 0 0 2px inset, rgba(0, 0, 0, 0.4) 0 1px 2px;
+      text-decoration: none;
+      transition-duration: .15s, .15s;
+    }
+
+    .form-button:active {
+      box-shadow: rgba(0, 0, 0, 0.15) 0 2px 4px inset, rgba(0, 0, 0, 0.4) 0 1px 1px;
+    }
+
+    .form-button:disabled {
+      cursor: not-allowed;
+      opacity: .6;
+    }
+
+    .form-button:disabled:active {
+      pointer-events: none;
+    }
+
+    .form-button:disabled:hover {
+      box-shadow: none;
+    }
+    .bottom-row{
+      margin-top: 15px;
+      margin-bottom: 25px;
+    }
+    .form-row{
+      margin-bottom: 20px;
+    }
+    #overlay{
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      padding-top: 30%;
+      background: #4d7e9d;
+      z-index: 999999;
+      top: 0px;
+      left: 0px;
+      right: 0px;
+      bottom: 0px;
+      color: #fff;
+      font-weight: bold;
+      display: none;
+    }
+    .logo {
+      background: url("data:image/png;base64,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");
+      width: 45px;
+      height: 45px;
+      display: inline-block;
+      background-size: cover;
+    }
+    #progress-container {
+      height: 25px;
+      width: 100%;
+      display: inline-block;
+      margin-top: 35px;
+    }
+    #progress-bar {
+      height: 25px;
+      background: #fff;
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div class="page-content">
+  <div class="icon">
+    <span class="logo"></span>
+  </div>
+  <div class="header">
+    Smart Home Device
+  </div>
+  <div class="clear"></div>
+  <div class="tabbed">
+    <input type="radio" id="tab1" name="css-tabs" checked>
+    <input type="radio" id="tab2" name="css-tabs">
+    <input type="radio" id="tab3" name="css-tabs">
+
+    <ul class="tabs">
+      <li class="tab"><label for="tab1">Home</label></li>
+      <li class="tab"><label for="tab2">Configuration</label></li>
+      <li class="tab"><label for="tab3">Firmware</label></li>
+    </ul>
+
+    <div class="tab-content">
+      <h3>Device information</h3>
+      <div class="row">
+        <div class="td">Device version</div>
+        <div class="td" id="device-info-version">1.0.0</div>
+      </div>
+      <div class="row">
+        <div class="td">Device type</div>
+        <div class="td" id="device-info-type">TUYA-SWITCH</div>
+      </div>
+      <div class="row">
+        <div class="td">MAC Address</div>
+        <div class="td" id="device-info-mac">11:22:33:55:66</div>
+      </div>
+
+      <div class="row">
+        <div class="td">Wifi AP</div>
+        <div class="td" id="device-info-ssid">Lazada RF</div>
+      </div>
+      <div class="row">
+        <div class="td">Gateway</div>
+        <div class="td" id="device-info-gateway">192.168.1.1</div>
+      </div>
+      <div class="row">
+        <div class="td">Local IP</div>
+        <div class="td" id="device-info-ip">192.168.1.2</div>
+      </div>
+    </div>
+
+    <div class="tab-content">
+      <h3>Device configuration</h3>
+      <form  id="device-config-form" onsubmit="event.preventDefault(); submitConfigForm(this);" name="device-config-form" action="#">
+        <div class="row">
+          <div class="form-row">
+            <label class="form-label">Wifi name:</label>
+            <input class="form-input" type="text" id="device-config-wifi" placeholder="Please input wifi name"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-row">
+            <label class="form-label">Wifi password:</label>
+            <input class="form-input" type="password" id="device-config-password" placeholder="Please input wifi password"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-row">
+            <label class="form-label">API Address:</label>
+            <input class="form-input" type="text" id="device-config-api" placeholder="Please input Api endpoint"/>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="form-row">
+            <label class="form-label">Device type:</label>
+            <select class="form-input" id="device-config-type">
+              <option value="">Please select device type</option>
+              <option value="TUYA_SWITCH">Tuya Swicth</option>
+              <option value="SWITCH">Normal Swicth</option>
+              <option value="IR_GATEWAY">IR Gateway</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row bottom-row">
+          <div class="form-row">
+            <button class="form-button" type="submit">Register & Restart</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <div class="tab-content">
+      <h3>Device Firmware</h3>
+      <div style="font-weight: bold">Current version : <span id="device-info-version-2">1.0.0</span></div>
+      <br />
+      <br />
+      <h4>Upgrade new version</h4>
+      <form id="uploadform" onsubmit="return false">
+        <input id="fileupload" class="form-input" name="inobinfile" type="file" accept=".bin"/>
+        <br /> <br />
+        <input type="button" class="form-button" value="submit" id="submit" />
+      </form>
+    </div>
+  </div>
+</div>
+<div id="overlay">
+  <span class="logo"></span>
+  <div id="overlay-message">Upgrading firmware, please wait...!</div>
+  <div id="progress-container">
+    <div id="progress-bar" style="width: 0%">0%</div>
+  </div>
+</div>
+<script type="application/javascript">
+  function isNumeric(value) {
+    return /^-?\d+$/.test(value);
+  }
+  function uploadFirmware() {
+    //e.stopPropagation();
+    //e.preventDefault();
+    const fileInput = document.getElementById('fileupload');
+    const file = fileInput.files[0];
+    if (!file) {
+      alert('Please select a file first!');
+      return;
+    }
+
+    try {
+      document.getElementById("overlay").style.display = 'block';
+      const reader = new FileReader();
+      reader.onload = async function () {
+        const arrayBuffer = reader.result;
+
+        // Use fetch to send the binary content directly
+        fetch('./upgrade.json', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'binary/octet-stream',
+            'Content-Length': arrayBuffer.byteLength,
+          },
+          body: arrayBuffer, // send the ArrayBuffer directly
+        }).then(response => response.body)
+        .then(rs => {
+          const reader = rs.getReader();
+          return new ReadableStream({
+            async start(controller) {
+              while (true) {
+                const {done, value} = await reader.read();
+                const decoder = new TextDecoder('utf-8');
+                const data = decoder.decode(value);
+                console.log('Upload response: ', data);
+                if (done) {
+                  document.getElementById("overlay-message").innerText = "Uploading firmware done!";
+                  document.getElementById("progress-bar").innerText = "100%";
+                  document.getElementById("progress-bar").style.width = "100%";
+                  break;
+                }
+                if (isNumeric(data)) {
+                  document.getElementById("progress-bar").style.width = data + "%";
+                  document.getElementById("progress-bar").innerText = data + "%";
+                } else {
+                  document.getElementById("overlay-message").innerText = data;
+                }
+                controller.enqueue(value);
+              }
+              controller.close();
+              reader.releaseLock();
+            }
+          })
+        })
+        .then(rs => new Response(rs))
+        .then(response => response.blob())
+        .catch(console.error);
+      }
+      // Read the file as an ArrayBuffer
+      reader.readAsArrayBuffer(file);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+    return false;
+  }
+  ;(() => {
+    const requestGet = async (path) => {
+      return await fetch(path).then(res => res.json());
+    };
+
+    const requestPost = async (path, data) => {
+      const rawResponse = await fetch(path, {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+      const content = await rawResponse.json();
+      console.log(content);
+      return content;
+    }
+    let config = {
+      device: {
+        version: "1.0.0",
+        type: "TUYA_SWITCH",
+        macAddress: "aa:bb:cc:dd:ff"
+      },
+      network: {
+        ssid: "LongKa",
+        password: "Long@#123",
+        gateway: "192.168.1.1",
+        ip: "192.168.1.2"
+      },
+      system: {
+        api: "http://home.quangiaso.com/api"
+      }
+    }
+    const loadConfig = async () => {
+      try {
+        config = await requestGet("./get-config.json");
+      } catch (e) {
+        console.log(e);
+      }
+      console.log(config);
+      document.getElementById("device-config-wifi").value = config.network.ssid;
+      document.getElementById("device-info-ssid").innerText = config.network.ssid;
+      document.getElementById("device-config-password").value = config.network.password;
+      document.getElementById("device-config-api").value = config.system.api;
+      let deviceType = document.getElementById("device-config-type");
+      for (var i = 0; i < deviceType.options.length; i++) {
+        if (deviceType.options[i].value === config.device.type) {
+          deviceType.options[i].selected = true;
+          break;
+        }
+      }
+      //document.getElementById("device-config-type").value = config.device.type;
+      document.getElementById("device-info-version").innerText = config.device.version;
+      document.getElementById("device-info-version-2").innerText = config.device.version;
+      document.getElementById("device-info-type").innerText = config.device.type;
+      document.getElementById("device-info-mac").innerText = config.device.macAddress;
+      document.getElementById("device-info-gateway").innerText = config.network.gateway;
+      document.getElementById("device-info-ip").innerText = config.network.ip;
+    };
+
+
+    const init = async () => {
+      await loadConfig();
+      document.getElementById('submit').addEventListener('click', uploadFirmware);
+    };
+
+    document.addEventListener("DOMContentLoaded", init);
+
+    window.submitConfigForm = async (form) => {
+      if (confirm("Save your settings and restart device?")) {
+        let data = {
+          wifi : form.querySelector('#device-config-wifi').value.trim(),
+          password : form.querySelector('#device-config-password').value,
+          api : form.querySelector("#device-config-api").value.trim(),
+          type : form.querySelector("#device-config-type").value.trim(),
+        }
+        console.log(data);
+        if (data.wifi === '') {
+          alert("Wifi name could not be empty!");
+          return false;
+        }
+
+        if (data.api === '') {
+          alert("Api endpoint could not be empty!");
+          return false;
+        }
+
+        if (data.type === '') {
+          alert("Device type could not be empty!");
+          return false;
+        }
+
+        const resp = await requestPost("./save-config.json", data);
+        if (resp.restart === 'true') {
+          document.getElementById("overlay").style.display = 'block';
+        } else {
+          alert("Succeed! Your configurations have been saved successfully!")
+        }
+      }
+      return false;
+    };
+  })();
+</script>
+</body>
+</html>
