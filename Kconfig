@@ -1,0 +1,34 @@
+menu "Application Configurations"
+    config APP_MODULE
+        string "App module name"
+        default "DEFAULT"
+
+    config SYSTEM_DOMAIN
+        string "System backend domain"
+        default "home.quangiaso.com"
+    config SYSTEM_PORT
+        int "System backend port"
+        default 80
+
+    config BUTTON_DEBOUNCE_SHORT_TIME
+        int "Short time"
+        default 30
+        help
+            Set short button press time in miliseconds.
+
+    config BUTTON_DEBOUNCE_MEDIUM_TIME
+        int "Medium time"
+        default 3000
+        help
+            Set medium button press time in miliseconds.
+
+    config BUTTON_DEBOUNCE_LONG_TIME
+        int "Long time"
+        default 5000
+        help
+            Set short button press time in miliseconds.
+
+    config TUYA_SWITCH_MODEL
+        string "Tuya switch model"
+        default "11"
+endmenu
