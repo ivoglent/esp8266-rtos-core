@@ -233,8 +233,12 @@ void ConfigurationService::_requestMqttConfig() {
 }
 
 void ConfigurationService::onEvent(const SystemOpenConfig &msg) {
-    auto portal = new ConfigPortal(_version , _wifiProps, _appProps);
-    portal->start();
+    if (!_openedCp) {
+        _openedCp = true;
+        auto portal = new ConfigPortal(_version , _wifiProps, _appProps);
+        portal->start();
+    }
+
 }
 
 ConfigurationService::~ConfigurationService() {

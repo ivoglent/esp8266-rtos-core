@@ -28,6 +28,7 @@ private:
     WifiProperties _wifiProps;
     MqttProperties _mqttProps;
     AppProperties _appProps;
+    bool _openedCp = false;
 public:
     explicit ConfigurationService(Registry &registry, const std::string& version);
 

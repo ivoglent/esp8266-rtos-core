@@ -2,6 +2,7 @@
 #include <lwip/netdb.h>
 #include "MqttService.h"
 
+uint32_t _mqttRetryCount = 0;
 bool MqttService::compareTopics(std::string topic, std::string origin) {
     enum class State {
         None,
@@ -148,10 +149,12 @@ void MqttService::eventHandler(esp_event_base_t base, int32_t event_id, void *ev
         case MQTT_EVENT_CONNECTED:
             xEventGroupSetBits(Registry::SYSTEM_STATE_BITs, SYS_MQTT_READY);
             eventHandlerConnect(base, event_id, event_data);
+            _mqttRetryCount = 0;
             break;
         case MQTT_EVENT_DISCONNECTED:
             xEventGroupClearBits(Registry::SYSTEM_STATE_BITs, SYS_MQTT_READY);
             eventHandlerDisconnect(base, event_id, event_data);
+            _mqttRetryCount++;
             break;
         case MQTT_EVENT_DATA:
             eventHandlerData(base, event_id, event_data);
@@ -188,7 +191,7 @@ void MqttService::connect() {
         esp_mqtt_client_start(_client);
     } else {
         esp_logw(mqtt, "MQTT configuration is empty!");
-        getBus().post(SystemMissingMqtt{});
+        getBus().post(SystemOpenConfig{});
     }
 
 }

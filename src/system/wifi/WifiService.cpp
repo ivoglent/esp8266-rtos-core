@@ -1,4 +1,5 @@
 #include "WifiService.h"
+uint32_t _retryCount = 0;
 static std::string ip4addrToString(const ip4_addr_t& ip)
 {
     // inet_ntoa converts the IP address to a C-style string in IPv4 dotted-decimal notation.
@@ -25,10 +26,15 @@ void eventHandler(void* arg, esp_event_base_t event_base, int32_t event_id, void
         esp_logw(wifi, "Wifi disconnected! Reason = %d", reason->reason);
         getDefaultEventBus().post(SystemEventChanged{SystemStatus::WIFI_DISCONNECTED});
         xEventGroupClearBits(Registry::SYSTEM_STATE_BITs, SYS_WIFI_READY);
-        vTaskDelay(100 / portTICK_PERIOD_MS);
+        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        _retryCount++;
+        if (_retryCount >= 60) {
+            getDefaultEventBus().post(SystemOpenConfig{});
+        }
         esp_wifi_connect();
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         esp_logi(wifi, "Connected!");
+        _retryCount = 0;
         getDefaultEventBus().post(SystemEventChanged{SystemStatus::WIFI_CONNECTED,});
         auto *event = (ip_event_got_ip_t *) event_data;
         esp_logi(wifi, "got ip: " IPSTR, IP2STR(&event->ip_info.ip));
@@ -111,6 +117,7 @@ WifiService::~WifiService() {
 void WifiService::onEvent(const SystemConfigReady &event) {
     if (_ssid.empty()) {
         esp_loge(wifi, "Wifi SSID is empty. Stopped!");
+        getBus().post(SystemOpenConfig{});
         return;
     }
     start(_ssid, _password);
