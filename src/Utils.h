@@ -34,30 +34,18 @@ inline void string_append(std::string &str, const char *src, const char *sep) {
     str += std::string(sep) + src;
 }
 
-inline std::string string_append(char **src, const char *sep, int start) {
-    std::stringstream ss;
-    for (int i = start; src[i] != nullptr; i++) {
-        if (i > start)
-            ss << sep;
-        ss << src[i];
-    }
-    return ss.str();
-}
-
-inline std::string string_append(std::vector<std::string> src, const char *sep, int start) {
-    std::stringstream ss;
-    for (int i = start; i < src.size(); i++) {
-        if (i > start)
-            ss << sep;
-        ss << src.at(i);
-    }
-    return ss.str();
-}
-
 inline void get_wifi_mac_address(char *mac) {
     uint8_t mac_addr[6];
     esp_wifi_get_mac(static_cast<wifi_interface_t>(ESP_IF_WIFI_STA), mac_addr);
     sprintf(mac, "%02X:%02X:%02X:%02X:%02X:%02X",
+            mac_addr[0], mac_addr[1], mac_addr[2],
+            mac_addr[3], mac_addr[4], mac_addr[5]);
+}
+
+inline void get_client_id_from_mac_address(char *client_id) {
+    uint8_t mac_addr[6];
+    esp_wifi_get_mac(static_cast<wifi_interface_t>(ESP_IF_WIFI_STA), mac_addr);
+    sprintf(client_id, "%02X-%02X-%02X-%02X-%02X-%02X",
             mac_addr[0], mac_addr[1], mac_addr[2],
             mac_addr[3], mac_addr[4], mac_addr[5]);
 }

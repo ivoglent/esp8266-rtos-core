@@ -232,6 +232,12 @@ void ConfigPortal::start() {
     esp_wifi_init(&cfg);
     // Set mode to AP+STA without stopping Wi-Fi
     ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_APSTA));
+    char name[18];
+    get_client_id_from_mac_address(name);
+
+    std::string apName = SOFT_AP_SSID;
+    apName += name;
+    esp_logd(CP, "AP name: %s", apName.c_str());
     wifi_ap_config_t apConfig = {
             SOFT_AP_SSID,
             SOFT_AP_PASS,
@@ -242,6 +248,10 @@ void ConfigPortal::start() {
             SOFT_AP_MAX_CONN,
             0,
     };
+    memcpy(apConfig.ssid, apName.c_str(), apName.size());
+   // apConfig.ssid[apName.size()] = '\0';
+    esp_logi(CP, "Opening Config Portal SSID: %s", apConfig.ssid);
+
     wifi_config_t wifiConfig = {
             .ap = apConfig
     };

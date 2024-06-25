@@ -12,7 +12,8 @@
 #include <utility>
 #include "../../Utils.h"
 #include "../ota/esp_httpd_ota.h"
-#define SOFT_AP_SSID     "dragon"
+#include <strstream>
+#define SOFT_AP_SSID     "Home-IoT-"
 #define SOFT_AP_PASS     ""
 #define SOFT_AP_MAX_CONN 1
 #define SOFT_AP_CHANNEL  1

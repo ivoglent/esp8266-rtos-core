@@ -144,7 +144,7 @@ Registry& getRegistryInstance();
 
 inline static void system_restart() {
     getDefaultEventBus().post(SystemShutdown{});
-    vTaskDelay(100);
+    vTaskDelay(1000 / portTICK_PERIOD_MS);
     taskENTER_CRITICAL();
     esp_restart();
     taskEXIT_CRITICAL();

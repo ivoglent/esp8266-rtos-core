@@ -12,7 +12,7 @@ ConfigurationService::ConfigurationService(Registry &registry, const std::string
 }
 
 void ConfigurationService::apply(const AppProperties &props) {
-    esp_logd(conf, "Got AppProperties props");
+    esp_logd(conf, "Got AppProperties props: type->{%s} api->{%s}", props.type.c_str(), props.api.c_str());
     _appProps = props;
 }
 
@@ -92,7 +92,7 @@ void ConfigurationService::setupWifi(const char *ssid, const char *password) {
     wifiProperties.ssid = std::string(ssid);
     wifiProperties.password = std::string(password);
     saveWifiConfigToFile(wifiProperties);
-    esp_restart();
+    system_restart();
 }
 
 
@@ -130,7 +130,7 @@ void ConfigurationService::setupMqtt(const std::string &uri, const std::string &
     mqttProperties.username = username;
     mqttProperties.password = password;
     saveMqttConfigToFile(mqttProperties);
-    esp_restart();
+    system_restart();
 }
 
 int ConfigurationService::setupMqttCmd(int argc, char **argv) {

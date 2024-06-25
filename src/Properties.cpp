@@ -69,7 +69,7 @@ void fromJson(cJSON *json, MqttProperties &props) {
 
 [[maybe_unused]] std::string toJson(const AppProperties &props) {
     cJSON *root = cJSON_CreateObject();
-    cJSON_AddStringToObject(root, "uri", props.api.c_str());
+    cJSON_AddStringToObject(root, "api", props.api.c_str());
     cJSON_AddStringToObject(root, "type", props.type.c_str());
     char *jsonString = cJSON_Print(root);
     cJSON_Delete(root);
