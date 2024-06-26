@@ -23,8 +23,6 @@ public:
 
     static int versionCmd(int argc, char **argv);
 
-    static int setStateCmd(int argc, char **argv);
-
     static int openConfigPortal(int argc, char **argv);
 
     ~CommandService() override = default;

@@ -21,10 +21,6 @@ enum SystemEventId {
 
 };
 
-enum UserEventId {
-    EVT_SWITCH_STATE,
-    EVT_SWITCH_SET,
-};
 
 enum class SystemStatus {
     READY,
@@ -101,15 +97,6 @@ struct ReportVersionEvent : TEvent<EVT_APP_REPORT_VERSION, CORE> {
     char version[20];
 };
 
-struct SwitchStateEvent : TEvent<EVT_SWITCH_STATE, USER> {
-    char uuid[6];
-    bool state;
-};
-
-struct SetStateEvent : TEvent<EVT_SWITCH_SET, USER> {
-    char uuid[6];
-    bool state;
-};
 
 inline void toJson(cJSON *json, const OtaVersion &event) {
     cJSON_AddStringToObject(json, "version", event.version);

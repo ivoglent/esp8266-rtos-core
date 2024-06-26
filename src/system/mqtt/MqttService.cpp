@@ -57,23 +57,9 @@ MqttService::MqttService(Registry &registry) : TService(registry) {
 void MqttService::eventHandlerConnect(esp_event_base_t event_base, int32_t event_id, void *event_data) {
     esp_logi(mqtt, "MQTT connected successfully!");
     for (const auto &it: _handlers) {
-        std::string fullPath;
-        switch (it.second.type) {
-            case MQTT_SUB_RELATIVE:
-                fullPath = _prefix;
-                fullPath.append(it.first);
-                break;
-            case MQTT_SUB_BROADCAST:
-                fullPath = _broadcast;
-                fullPath.append(it.first);
-            case MQTT_SUB_RELATIVE_SUBFIX:
-                fullPath = it.first + _prefix;
-            default:
-                break;
-        }
-        int msg_id = esp_mqtt_client_subscribe(_client, fullPath.c_str(), 0);
-        esp_logi(mqtt, "sub successful, topic: %s, msg_id: %d", fullPath.c_str(), msg_id);
+        _subscribe(it.first, it.second);
     }
+    _subscribed = true;
     getDefaultEventBus().post(SystemEventChanged{SystemStatus::MQTT_CONNECTED});
 }
 
@@ -83,58 +69,52 @@ void MqttService::eventHandlerDisconnect(esp_event_base_t event_base, int32_t ev
 }
 
 static std::unordered_map<std::string, std::string> buffers;
-
+static std::string currentTopic;
 void MqttService::eventHandlerData(esp_event_base_t event_base, int32_t event_id, void *event_data) {
     auto event = static_cast<esp_mqtt_event_handle_t>(event_data);
-//    // prepare topic
-    static std::string topic;
+    esp_logi(mqtt, "Got message from topic: %s. Topic len=%d, data len=%d total len=%d", event->topic, event->topic_len, event->data_len, event->total_data_len);
     if (event->topic_len > 0) {
-        topic = std::string(event->topic, event->topic_len);
+        char rawTopic[event->topic_len + 1];
+        strncpy(rawTopic, event->topic, event->topic_len);
+        currentTopic = std::string(rawTopic);
+        esp_logd(mqtt, "Full topic: %s", currentTopic.data());
     }
-    esp_logi(mqtt, "Got message from topic: %s. Topic len=%d, data len=%d total len=%d", topic.c_str(), event->topic_len, event->data_len, event->total_data_len);
     std::string segment;
-    if (buffers.find(topic) == buffers.end()) {
+    if (buffers.find(currentTopic) != buffers.end()) {
         esp_logi(mqtt, "Found in buffer, get mqtt message parts back");
-        segment = buffers.at(topic);
+        segment = buffers.at(currentTopic);
     }
     segment.append(event->data, event->data_len);
     // process segment data
     if (segment.size() < event->total_data_len) {
         esp_logd(mqtt, "Waiting more parts, current len=%d, total len=%d", segment.size(), event->total_data_len);
-        buffers.emplace(topic.c_str(), segment);
+        buffers.emplace(currentTopic.c_str(), segment);
         return;
     }
     std::string message(segment.data(), event->total_data_len);
+    esp_logd(mqtt, "Message content: %s", message.data());
     int handled = 0;
     for (const auto &it: _handlers) {
-        std::string fullPath;
-        switch (it.second.type) {
-            case MQTT_SUB_RELATIVE:
-                fullPath = _prefix;
-                fullPath.append(it.first);
-                break;
-            case MQTT_SUB_BROADCAST:
-                fullPath = _broadcast;
-                fullPath.append(it.first);
-            case MQTT_SUB_RELATIVE_SUBFIX:
-                fullPath = it.first + _prefix;
-            default:
-                break;
-        }
-        if (compareTopics(fullPath, topic)) {
+        std::string fullPath = _generateFullTopic(it.first, it.second);
+        if (compareTopics(fullPath, currentTopic)) {
             esp_logi(mqtt, "Handling message %s from topic %s", message.data(), fullPath.c_str());
             auto json = cJSON_Parse(message.data());
             if (json) {
-                it.second.handler(json);
+                if (it.second.param) {
+                    it.second.handlerParam(json, it.second.param);
+                } else {
+                    it.second.handler(json);
+                }
+
                 cJSON_Delete(json);
             }
             handled++;
         }
     }
     segment.clear();
-    buffers.erase(topic);
+    buffers.erase(currentTopic);
     if (handled == 0) {
-        esp_logw(mqtt, "unhandled: %s (%s)", topic.data(), message.data());
+        esp_logw(mqtt, "unhandled: %s (%s)", currentTopic.data(), message.data());
     }
 }
 
@@ -177,15 +157,15 @@ void MqttService::connect() {
                 .password = _mqttProperties.password.c_str(),
                 .keepalive = 30,
                 .disable_auto_reconnect = true,
-                .task_stack = 4096,
+                .task_stack = 8912,
                 .buffer_size = 1024,
                 .reconnect_timeout_ms = 1000,
         };
 
         _client = esp_mqtt_client_init(&mqtt_cfg);
         esp_mqtt_client_register_event(_client, MQTT_EVENT_ANY, eventHandler, this);
-        _prefix = "/" + _mqttProperties.homeId + "/" + _mqttProperties.clientId;
-        _sysprefix = "/sys/" + _mqttProperties.homeId + "/" + _mqttProperties.clientId;
+        _prefix = "/" + _mqttProperties.clientId;
+        _sysprefix = "/sys/" + _mqttProperties.clientId;
         _broadcast = "/" + _mqttProperties.homeId;
 
         esp_mqtt_client_start(_client);
@@ -247,4 +227,28 @@ void MqttService::setup() {
 }
 
 MqttService::~MqttService() {
+}
+
+void MqttService::_subscribe(const std::string &topic, const mqtt_sub_info &info) {
+    std::string fullPath = _generateFullTopic(topic, info);
+    int msg_id = esp_mqtt_client_subscribe(_client, fullPath.c_str(), 0);
+    esp_logi(mqtt, "sub successful, topic: %s, msg_id: %d", fullPath.c_str(), msg_id);
+}
+
+std::string MqttService::_generateFullTopic(const std::string &topic, const mqtt_sub_info &info) {
+    std::string fullPath;
+    switch (info.type) {
+        case MQTT_SUB_RELATIVE:
+            fullPath = _prefix;
+            fullPath.append(topic);
+            break;
+        case MQTT_SUB_BROADCAST:
+            fullPath = _broadcast;
+            fullPath.append(topic);
+        case MQTT_SUB_RELATIVE_SUBFIX:
+            fullPath = topic + _prefix;
+        default:
+            break;
+    }
+    return fullPath;
 }

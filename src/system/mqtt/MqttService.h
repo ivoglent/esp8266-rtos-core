@@ -14,6 +14,7 @@
 #include <typeinfo>
 
 typedef std::function<void(const cJSON *json)> MqttJsonHandler;
+typedef std::function<void(const cJSON *json, void* param)> MqttJsonHandlerParam;
 
 enum mqtt_sub_type_t {
     MQTT_SUB_RELATIVE,
@@ -31,6 +32,8 @@ enum mqtt_pub_type_t {
 struct mqtt_sub_info {
     mqtt_sub_type_t type;
     MqttJsonHandler handler;
+    MqttJsonHandlerParam handlerParam;
+    void* param;
 };
 
 class MqttService
@@ -47,6 +50,11 @@ class MqttService
     MqttProperties _mqttProperties;
 
     EspTimer _reconTimer;
+
+    bool _subscribed = false;
+
+    void _subscribe(const std::string& topic, const mqtt_sub_info& info);
+    std::string _generateFullTopic(const std::string& topic, const mqtt_sub_info& info);
 
     enum State {
         S_Wifi_Disconnected,
@@ -88,24 +96,44 @@ public:
 
     void setup() override;
 
-
     template<typename T>
     void registerEventConsumer(std::string topic, mqtt_sub_type_t type) {
-        _handlers.emplace(
-                topic,
-                mqtt_sub_info{
-                        .type = type,
-                        .handler = [this](const cJSON *json) {
-                            T msg;
-                            fromJson(json, msg);
-                            getBus().post(msg);
-                        }
-                }
-        );
+        registerEventConsumer<T>(topic, type, nullptr);
     }
 
     template<typename T>
-    void registerEventPublsiher(std::string topic) {
+    void registerEventConsumer(std::string topic, mqtt_sub_type_t type, void* param) {
+        if (_handlers.find(topic) == _handlers.end()) {
+            auto info = mqtt_sub_info{
+                    .type = type,
+                    .param = param
+            };
+            if (param) {
+                info.handlerParam = [this](const cJSON *json, void* param) {
+                    T msg;
+                    fromJson(json, msg);
+                    msg.param = param;
+                    getBus().post(msg);
+                };
+            } else {
+                info.handler = [this](const cJSON *json) {
+                    T msg;
+                    fromJson(json, msg);
+                    getBus().post(msg);
+                };
+            }
+            _handlers.emplace(
+                    topic,
+                    info
+            );
+            if (_subscribed) {
+                _subscribe(topic, info);
+            }
+        }
+    }
+
+    template<typename T>
+    void registerEventPublisher(std::string topic) {
         registerEventPublisher<T>(topic, MQTT_PUB_RELATIVE_PREFIX);
     }
 

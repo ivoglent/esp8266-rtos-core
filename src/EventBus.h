@@ -31,6 +31,7 @@ struct TEvent : Event {
     enum {
         ID = DEF_MSG_ID(eventId, sysId, bits)
     };
+    void* param;
 };
 
 struct IEvent {

@@ -23,7 +23,6 @@ CommandService::CommandService(Registry &registry) : TService(registry) {
     register_console_command("mem", freeMem, "", "Check free heap");
     register_console_command("info", infoCmd, "", "Get some information from chip");
     register_console_command("version", versionCmd);
-    register_console_command("state", setStateCmd);
     register_console_command("config", openConfigPortal);
 }
 
@@ -93,19 +92,6 @@ int CommandService::versionCmd(int argc, char **argv) {
     return 0;
 }
 
-int CommandService::setStateCmd(int argc, char **argv) {
-    if (argc <3) {
-        esp_loge(cmd, "Invalid params");
-        return -1;
-    }
-    char* uuid = argv[1];
-    int state = atoi(argv[2]);
-    SetStateEvent evt{};
-    evt.state = state != 0;
-    strcpy(evt.uuid, uuid);
-    getDefaultEventBus().post(evt);
-    return 0;
-}
 
 int CommandService::openConfigPortal(int argc, char **argv) {
     SystemOpenConfig evt{};
