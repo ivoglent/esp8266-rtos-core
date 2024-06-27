@@ -3,6 +3,7 @@
 #include "MqttService.h"
 
 uint32_t _mqttRetryCount = 0;
+uint32_t _errorCount = 0;
 bool MqttService::compareTopics(std::string topic, std::string origin) {
     enum class State {
         None,
@@ -120,7 +121,11 @@ void MqttService::eventHandlerData(esp_event_base_t event_base, int32_t event_id
 
 void MqttService::eventHandlerError(esp_event_base_t event_base, int32_t event_id, void *event_data) {
     auto event = static_cast<esp_mqtt_event_handle_t>(event_data);
-    esp_logd(mqtt, "Last errno string (%s)", strerror(event->error_handle->error_type));
+    esp_logd(mqtt, "Last errno string (%s). Error count: %d", strerror(event->error_handle->error_type), _errorCount);
+    _errorCount++;
+    if (_errorCount >= 60) {
+        system_restart();
+    }
 }
 
 
