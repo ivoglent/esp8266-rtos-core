@@ -165,6 +165,15 @@ public:
                         break;
 
                 }
+                if (!str) {
+                    const char *error_ptr = cJSON_GetErrorPtr();
+                    if (error_ptr != nullptr) {
+                        esp_loge(mqtt, "Error before: %s", error_ptr);
+                    }
+                    esp_loge(mqtt, "Message is empty");
+                    cJSON_free(str);
+                    return;
+                }
                 if (!fullTopic.empty()) {
                     esp_mqtt_client_publish(_client, fullTopic.c_str(), str, (int) strlen(str), 0, false);
                     esp_logi(mqtt, "Publish to topic: %s message: %s", fullTopic.data(), str);
