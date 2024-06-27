@@ -9,4 +9,7 @@ menu "RTOS SDK Core Library Configuration"
     config SYSTEM_PORT
         int "System backend port"
         default 80
+    config IS_1MB_FLASH
+        bool "Is esp01 with 1MB of flash"
+        default n
 endmenu

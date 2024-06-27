@@ -233,12 +233,15 @@ void ConfigurationService::_requestMqttConfig() {
 }
 
 void ConfigurationService::onEvent(const SystemOpenConfig &msg) {
+#ifndef CONFIG_IS_1MB_FLASH
     if (!_openedCp) {
         _openedCp = true;
         auto portal = new ConfigPortal(_version , _wifiProps, _appProps);
         portal->start();
     }
-
+#else
+    esp_logw(conf, "Config portal is not supported!");
+#endif
 }
 
 ConfigurationService::~ConfigurationService() {

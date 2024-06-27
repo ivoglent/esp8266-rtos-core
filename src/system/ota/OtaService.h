@@ -1,5 +1,5 @@
 #pragma once
-
+#ifndef CONFIG_IS_1MB_FLASH
 #include "../../Core.h"
 #include "../../system/SystemService.h"
 #include "../../Event.h"
@@ -27,3 +27,4 @@ public:
 };
 
 
+#endif

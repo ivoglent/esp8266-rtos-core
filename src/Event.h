@@ -57,7 +57,7 @@ struct TimerEvent : TEvent<EVT_TIMER, CORE, timerId> {
     };
 };
 
-
+#ifndef CONFIG_IS_1MB_FLASH
 struct OtaEventDataExt {
     char type[10];
 };
@@ -77,20 +77,6 @@ struct OtaVersion: TEvent<EVT_OTA_REPORT_VERSION, CORE> {
     char version[32];
     char module[30];
 };
-
-struct MqttServerConfig {
-    char username[36];
-    char password[36];
-    char clientId[36];
-    char uri[36];
-    char homeUuid[36];
-};
-
-struct ServerResponse {
-    bool success;
-    MqttServerConfig data;
-};
-
 
 
 struct ReportVersionEvent : TEvent<EVT_APP_REPORT_VERSION, CORE> {
@@ -137,6 +123,21 @@ inline void fromJson(const cJSON *json, OtaEvent &event) {
         item = item->next;
     }
 }
+#endif
+struct MqttServerConfig {
+    char username[36];
+    char password[36];
+    char clientId[36];
+    char uri[36];
+    char homeUuid[36];
+};
+
+struct ServerResponse {
+    bool success;
+    MqttServerConfig data;
+};
+
+
 
 
 inline void fromJson(const cJSON *json, ServerResponse &event) {
