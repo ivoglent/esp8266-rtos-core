@@ -169,9 +169,9 @@ void MqttService::connect() {
 
         _client = esp_mqtt_client_init(&mqtt_cfg);
         esp_mqtt_client_register_event(_client, MQTT_EVENT_ANY, eventHandler, this);
-        _prefix = "/" + _mqttProperties.clientId;
+        _prefix = "/user/" + _mqttProperties.clientId;
         _sysprefix = "/sys/" + _mqttProperties.clientId;
-        _broadcast = "/" + _mqttProperties.homeId;
+        _broadcast = "/broadcast/" + _mqttProperties.homeId;
 
         esp_mqtt_client_start(_client);
     } else {
