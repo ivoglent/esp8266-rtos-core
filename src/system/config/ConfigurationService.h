@@ -4,7 +4,11 @@
 #include "../storage/Storage.h"
 #include "../console/Console.h"
 #include "esp_http_client.h"
+#ifdef CONFIG_SUPPROT_CONFIG_PORTAL
 #include "ConfigPortal.h"
+#endif
+#include "../smart_config/SmartConfigService.h"
+#include "../mdns/MdnsService.h"
 #include "../../Timer.h"
 
 #ifndef SYSTEM_PORT
@@ -17,7 +21,7 @@
 class ConfigurationService :
         public TService<ConfigurationService, Service_Sys_Conf, CORE>,
         public TPropertiesConsumer<ConfigurationService, AppProperties, WifiProperties, MqttProperties>,
-        public TEventSubscriber<ConfigurationService, SystemMissingMqtt, SystemOpenConfig> {
+        public TEventSubscriber<ConfigurationService, SystemMissingMqtt, SystemOpenConfig, SystemLookupDnsConfig> {
 private:
     std::string _version;
     std::string _clientId{};
@@ -38,6 +42,7 @@ public:
 
     void onEvent(const SystemMissingMqtt& msg);
     void onEvent(const SystemOpenConfig& msg);
+    void onEvent(const SystemLookupDnsConfig& msg);
 
     static int setupWifiCmd(int argc, char **argv);
 

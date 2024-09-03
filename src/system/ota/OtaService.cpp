@@ -1,7 +1,7 @@
 //
 // Created by long.nguyenviet on 21/11/2023.
 //
-#ifndef CONFIG_IS_1MB_FLASH
+#ifndef CONFIG_SUPPORT_OTA_UPDATE
 #include "OtaService.h"
 
 static char urlUpdate[256];

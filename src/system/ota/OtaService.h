@@ -1,5 +1,5 @@
 #pragma once
-#ifndef CONFIG_IS_1MB_FLASH
+#ifndef CONFIG_SUPPORT_OTA_UPDATE
 #include "../../Core.h"
 #include "../../system/SystemService.h"
 #include "../../Event.h"

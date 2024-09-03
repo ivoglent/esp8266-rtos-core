@@ -7,7 +7,7 @@
 #include "Utils.h"
 #include "system/mqtt/MqttService.h"
 #include "system/wifi/WifiService.h"
-#ifndef CONFIG_IS_1MB_FLASH
+#ifndef CONFIG_SUPPORT_OTA_UPDATE
 #include "system/ota/OtaService.h"
 #endif
 #include "system/console/Console.h"
@@ -29,7 +29,7 @@ public:
         getRegistryInstance().create<ConfigurationService>(APP_VERSION);
         getRegistryInstance().create<CommandService>();
         auto& mqtt = getRegistryInstance().create<MqttService>();
-#ifndef CONFIG_IS_1MB_FLASH
+#ifndef CONFIG_SUPPORT_OTA_UPDATE
         getRegistryInstance().create<OtaService>();
         mqtt.registerEventPublisher<OtaVersion>("/ota/device/inform", MQTT_PUB_RELATIVE_SUFFIX);
         mqtt.registerEventConsumer<OtaEvent>("/ota/device/upgrade", MQTT_SUB_RELATIVE_SUBFIX);
@@ -40,7 +40,7 @@ public:
     void onEvent(const SystemEventChanged &event) {
         //esp_logi(app, "Got event bus msg!");
         if (event.status == SystemStatus::READY) {
-#ifndef CONFIG_IS_1MB_FLASH
+#ifndef CONFIG_SUPPORT_OTA_UPDATE
             ReportVersionEvent versionEvent{};
             strcpy(versionEvent.version, APP_VERSION);
             getDefaultEventBus().post(versionEvent);

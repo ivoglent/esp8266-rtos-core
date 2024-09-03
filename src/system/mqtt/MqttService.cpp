@@ -176,7 +176,7 @@ void MqttService::connect() {
         esp_mqtt_client_start(_client);
     } else {
         esp_logw(mqtt, "MQTT configuration is empty!");
-        getBus().post(SystemOpenConfig{});
+        getBus().post(SystemLookupDnsConfig{});
     }
 
 }

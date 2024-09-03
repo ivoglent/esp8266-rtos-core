@@ -17,6 +17,7 @@ enum SystemEventId {
     EVT_CONFIG_READY,
     EVT_MISSING_MQTT,
     EVT_OPEN_CONFIG,
+    EVT_DNS_CONFIG,
     EVT_SHUTDOWN
 
 };
@@ -50,6 +51,10 @@ struct SystemOpenConfig: TEvent<EVT_OPEN_CONFIG, CORE> {
 
 };
 
+struct SystemLookupDnsConfig: TEvent<EVT_DNS_CONFIG, CORE> {
+
+};
+
 template<uint16_t timerId>
 struct TimerEvent : TEvent<EVT_TIMER, CORE, timerId> {
     enum {
@@ -57,7 +62,7 @@ struct TimerEvent : TEvent<EVT_TIMER, CORE, timerId> {
     };
 };
 
-#ifndef CONFIG_IS_1MB_FLASH
+#ifndef CONFIG_SUPPORT_OTA_UPDATE
 struct OtaEventDataExt {
     char type[10];
 };

@@ -12,6 +12,8 @@ file(GLOB app_sources
         src/system/ota/*.cpp
         src/system/ota/*.c
         src/system/command/*.cpp
+        src/system/smart_config/*.cpp
+        src/system/mdns/*.cpp
         )
 
 idf_component_register(
@@ -28,6 +30,7 @@ idf_component_register(
             console
             app_update
             esp_http_server
+            mdns
 )
 
 #spiffs_create_partition_image(spiffs ../data)

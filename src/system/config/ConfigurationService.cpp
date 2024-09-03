@@ -233,15 +233,30 @@ void ConfigurationService::_requestMqttConfig() {
 }
 
 void ConfigurationService::onEvent(const SystemOpenConfig &msg) {
-#ifndef CONFIG_IS_1MB_FLASH
+#ifdef CONFIG_SUPPORT_CONFIG_PORTAL
     if (!_openedCp) {
         _openedCp = true;
         auto portal = new ConfigPortal(_version , _wifiProps, _appProps);
         portal->start();
     }
 #else
-    esp_logw(conf, "Config portal is not supported!");
+    esp_logi(conf, "Config portal is not supported, starting smart config...");
+    auto smartConfig = new SmartConfigService(getRegistryInstance());
+    smartConfig->setup();
 #endif
+}
+
+void ConfigurationService::onEvent(const SystemLookupDnsConfig& msg) {
+    esp_logi(conf, "Looking for service DNS...");
+    auto mdns = new MdnsService();
+    mdns->setup();
+    auto serviceAddress = mdns->lookUp();
+    while (serviceAddress == nullptr) {
+        vTaskDelay(3 * configTICK_RATE_HZ);
+        serviceAddress = mdns->lookUp();
+    }
+
+    esp_logi(conf, "Got service address, trying to register...");
 }
 
 ConfigurationService::~ConfigurationService() {

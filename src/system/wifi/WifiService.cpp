@@ -84,27 +84,22 @@ void WifiService::start(const std::string &ssid, const std::string &password) {
 
     ESP_ERROR_CHECK(esp_event_handler_register(WIFI_EVENT, ESP_EVENT_ANY_ID, &eventHandler, this));
     ESP_ERROR_CHECK(esp_event_handler_register(IP_EVENT, IP_EVENT_STA_GOT_IP, &eventHandler, this));
-
-   /* wifi_config_t wifi_config = {
-            .sta = {
-                    .ssid = "alibaba-guest"
-            }
-    };*/
+    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
+    if (_ssid.empty()) {
+        esp_loge(wifi, "Wifi SSID is empty. Stopped!");
+        getBus().post(SystemOpenConfig{});
+        return;
+    }
     wifi_config_t wifi_config{};
     memcpy(wifi_config.sta.ssid, ssid.c_str(), ssid.size());
     memcpy(wifi_config.sta.password, password.c_str(), password.size());
-
-    /* Setting a password implies station will connect to all security modes including WEP/WPA.
-        * However these modes are deprecated and not advisable to be used. Incase your Access point
-        * doesn't support WPA2, these mode can be enabled by commenting below line */
 
     if (strlen((char *)wifi_config.sta.password)) {
         wifi_config.sta.threshold.authmode = WIFI_AUTH_WPA2_PSK;
     }
 
-    ESP_ERROR_CHECK(esp_wifi_set_mode(WIFI_MODE_STA) );
     ESP_ERROR_CHECK(esp_wifi_set_config(ESP_IF_WIFI_STA, &wifi_config) );
-    ESP_ERROR_CHECK(esp_wifi_start() );
+    ESP_ERROR_CHECK(esp_wifi_start());
 
     esp_logi(wifi, "wifi_init_sta finished.");
 
@@ -115,11 +110,6 @@ WifiService::~WifiService() {
 }
 
 void WifiService::onEvent(const SystemConfigReady &event) {
-    if (_ssid.empty()) {
-        esp_loge(wifi, "Wifi SSID is empty. Stopped!");
-        getBus().post(SystemOpenConfig{});
-        return;
-    }
     start(_ssid, _password);
 }
 

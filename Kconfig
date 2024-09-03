@@ -9,7 +9,20 @@ menu "RTOS SDK Core Library Configuration"
     config SYSTEM_PORT
         int "System backend port"
         default 80
-    config IS_1MB_FLASH
-        bool "Is esp01 with 1MB of flash"
+    config SUPPORT_CONFIG_PORTAL
+        bool "Is support config portal"
         default n
+
+    config SUPPORT_OTA_UPDATE
+        bool "Is support OTA update"
+        default n
+
+    config SMART_CONFIG_KEY
+        string "Smart config encrypt key"
+        default "L+-@09"
+
+    config SUPPORT_LOCAL_MDNS
+        bool "Is support mDNS service"
+        default n
+
 endmenu

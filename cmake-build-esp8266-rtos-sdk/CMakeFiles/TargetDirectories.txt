@@ -1,0 +1,2 @@
+/Volumes/Works/Weekend/IoT/esp8266/esp8266-rtos-switch/components/esp8266-rtos-core/cmake-build-esp8266-rtos-sdk/CMakeFiles/rebuild_cache.dir
+/Volumes/Works/Weekend/IoT/esp8266/esp8266-rtos-switch/components/esp8266-rtos-core/cmake-build-esp8266-rtos-sdk/CMakeFiles/edit_cache.dir

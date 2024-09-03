@@ -7,6 +7,8 @@ enum SystemServiceId {
     Service_Sys_Cmd,
     Service_Sys_Ota,
     Service_Sys_Conf,
+    Service_Sys_Mdns,
+    Service_Sys_Smartconfig,
 };
 
 enum System {
